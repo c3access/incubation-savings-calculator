@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cleanroom Testing Cost Savings Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background-color: #ffffff; color: #333; line-height: 1.6; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; margin-bottom: 40px; padding: 40px 20px; background: #fafafa; border-radius: 16px; border: 1px dashed #d1d5db; }
+        .header h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2.2rem; font-weight: 800; color: #1a1a1a; margin-bottom: 12px; letter-spacing: -0.02em; }
+        .header p { font-size: 1rem; color: #666; max-width: 600px; margin: 0 auto; }
+        .calculator-layout { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; margin-bottom: 40px; }
+        .input-panel { background: #fafafa; border-radius: 16px; border: 1px dashed #d1d5db; padding: 30px; }
+        .results-panel { display: flex; flex-direction: column; gap: 20px; }
+        .section-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.4rem; font-weight: 700; color: #1a1a1a; margin-bottom: 24px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 10px; }
+        .input-icon, .section-icon { display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; font-size: 18px; color: #42C5F4; flex-shrink: 0; line-height: 1; }
+        .section-icon { width: 24px; height: 24px; font-size: 20px; }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: flex; align-items: center; gap: 8px; font-weight: 500; color: #333; margin-bottom: 6px; }
+        .field-badge { background: #f0f7ff; color: #42C5F4; font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 12px; margin-left: auto; flex-shrink: 0; }
+        .input-group input, .input-group select { width: 100%; padding: 12px 16px; border: 2px solid #e5e5e5; border-radius: 8px; font-size: 1rem; transition: border-color 0.2s ease; -webkit-appearance: none; appearance: none; }
+        @media screen and (max-width: 768px) { .input-group input, .input-group select { font-size: 16px; } }
+        .input-group input:focus, .input-group select:focus { outline: none; border-color: #42C5F4; }
+        .input-help { font-size: 0.9rem; color: #666; margin-top: 4px; }
+        .slider-container { margin: 8px 0; }
+        .slider-display-box { display: flex; align-items: baseline; gap: 8px; background: white; border: 2px solid #e5e5e5; border-radius: 8px; padding: 12px 16px; margin-bottom: 10px; width: 100%; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1rem; font-weight: 700; color: #1a1a1a; transition: border-color 0.2s ease; }
+        .slider-display-box:focus-within { border-color: #42C5F4; }
+        .slider-display-box input[type="number"] { border: none; outline: none; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1rem; font-weight: 700; color: #1a1a1a; width: 100%; background: transparent; padding: 0; -moz-appearance: textfield; }
+        .slider-display-box input[type="number"]::-webkit-outer-spin-button,
+        .slider-display-box input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .slider-display-box .slider-unit { color: #888; font-size: 0.8rem; font-weight: 500; white-space: nowrap; }
+        .slider { width: 100%; height: 26px; background: transparent; outline: none; cursor: pointer; -webkit-appearance: none; appearance: none; display: block; margin: 4px 0; }
+        .slider::-webkit-slider-runnable-track { height: 2px; border-radius: 999px; background: #42C5F4; }
+        .slider::-moz-range-track { height: 2px; border-radius: 999px; background: #42C5F4; border: none; }
+        .slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #42C5F4; cursor: pointer; border: 3px solid white; box-shadow: 0 2px 8px rgba(66,197,244,0.45), 0 1px 3px rgba(0,0,0,0.12); transition: all 0.2s ease; margin-top: -10px; }
+        .slider::-webkit-slider-thumb:hover { background: #3BADEC; transform: scale(1.08); }
+        .slider::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: #42C5F4; cursor: pointer; border: 3px solid white; box-shadow: 0 2px 8px rgba(66,197,244,0.45), 0 1px 3px rgba(0,0,0,0.12); }
+        .slider:focus { outline: none; }
+        .slider:focus::-webkit-slider-thumb { box-shadow: 0 0 0 4px rgba(66,197,244,0.2); }
+        .slider-range-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: #999; margin-top: 2px; }
+        .scenario-card { background: white; border-radius: 16px; border: 1px dashed #d1d5db; padding: 24px; position: relative; transition: all 0.3s ease; }
+        .scenario-card.current { border-color: #fde047; background: #fffbeb; }
+        .scenario-card.optimized { border-color: #22c55e; background: #f0fdf4; }
+        .scenario-badge { position: absolute; top: -8px; left: 20px; padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; color: white; }
+        .scenario-badge.current { background: #eab308; }
+        .scenario-badge.optimized { background: #16a34a; }
+        .scenario-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.1rem; font-weight: 600; color: #1a1a1a; margin-bottom: 16px; padding-top: 8px; }
+        .cost-display { margin-bottom: 20px; }
+        .primary-cost { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2.2rem; font-weight: 700; margin-bottom: 4px; }
+        .scenario-card.current .primary-cost { color: #ca8a04; }
+        .scenario-card.optimized .primary-cost { color: #16a34a; }
+        .cost-label { font-size: 0.9rem; color: #666; font-weight: 500; }
+        .cost-breakdown { border-top: 1px solid #f3f4f6; padding-top: 16px; }
+        .breakdown-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 0.9rem; }
+        .breakdown-label { color: #666; }
+        .breakdown-value { font-weight: 600; color: #374151; }
+        .savings-highlight { background: linear-gradient(135deg, #42C5F4 0%, #3BADEC 100%); color: white; border-radius: 20px; padding: 32px 24px; text-align: center; position: relative; overflow: visible; border: 1px dashed rgba(255,255,255,0.6); transform: scale(1.02); }
+        .savings-highlight::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 20px; background: url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><circle fill="%23ffffff" opacity="0.08" cx="30" cy="30" r="2"/></g></svg>') repeat; pointer-events: none; overflow: hidden; }
+        .savings-badge { position: absolute; top: -10px; left: 20px; background: white; color: #42C5F4; font-size: 0.72rem; font-weight: 700; padding: 4px 12px; border-radius: 12px; letter-spacing: 0.05em; z-index: 2; }
+        .savings-highlight::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><circle fill="%23ffffff" opacity="0.08" cx="30" cy="30" r="2"/></g></svg>') repeat; pointer-events: none; }
+        .savings-highlight-content { position: relative; z-index: 1; }
+        .savings-amount { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 3.4rem; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.02em; }
+        .savings-label { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.2rem; font-weight: 600; opacity: 0.95; letter-spacing: -0.01em; }
+        .roi-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #f8fffe; padding: 20px; border-radius: 12px; border-left: 4px solid #42C5F4; }
+        .metric-item { text-align: center; }
+        .metric-number { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.8rem; font-weight: 700; color: #42C5F4; margin-bottom: 4px; }
+        .metric-label { font-size: 0.9rem; color: #666; font-weight: 500; }
+        @media (max-width: 1024px) { .calculator-layout { grid-template-columns: 1fr; gap: 24px; } .header h1 { font-size: 1.8rem; } .savings-amount { font-size: 2.2rem; } .roi-metrics { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { .container { padding: 16px; } .header { padding: 24px 16px; margin-bottom: 24px; } .header h1 { font-size: 1.6rem; line-height: 1.2; } .header p { font-size: 0.9rem; } .calculator-layout { gap: 16px; } .input-panel { padding: 20px; } .section-title { font-size: 1.2rem; margin-bottom: 20px; } .input-group { margin-bottom: 20px; } .input-group label { font-size: 0.9rem; margin-bottom: 8px; flex-wrap: wrap; gap: 6px; } .field-badge { font-size: 0.7rem; padding: 2px 8px; margin-left: 4px; flex-basis: auto; order: unset; } .input-group input, .input-group select { padding: 16px 14px; font-size: 16px; border-radius: 12px; } .input-help { font-size: 0.85rem; margin-top: 8px; } .slider { height: 10px; } .slider::-webkit-slider-thumb { width: 24px; height: 24px; } .slider::-moz-range-thumb { width: 24px; height: 24px; } .slider-value { margin-top: 16px; font-size: 1.2rem; } .slider-value span { font-size: 1.3rem; } .savings-highlight { padding: 20px 16px; } .savings-amount { font-size: 2rem; margin-bottom: 6px; } .savings-label { font-size: 1rem; } .scenario-card { padding: 20px; } .scenario-title { font-size: 1.1rem; margin-bottom: 16px; } .primary-cost { font-size: 2rem; margin-bottom: 6px; } .cost-label { font-size: 0.85rem; } .breakdown-item { padding: 8px 0; font-size: 0.85rem; } .roi-metrics { grid-template-columns: 1fr 1fr; gap: 12px; } .metric-number { font-size: 1.6rem; margin-bottom: 6px; } .metric-label { font-size: 0.8rem; } }
+        @media (max-width: 480px) { .container { padding: 12px; } .header { padding: 20px 12px; } .header h1 { font-size: 1.4rem; } .input-panel { padding: 16px; } .input-group input, .input-group select { padding: 14px 12px; } .savings-amount { font-size: 1.8rem; } .scenario-card { padding: 16px; } .primary-cost { font-size: 1.8rem; } .roi-metrics { grid-template-columns: 1fr; } .breakdown-item { font-size: 0.8rem; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Cleanroom Testing Cost Comparison Tool</h1>
+            <p>Compare your current outsourcing costs with an optimized hybrid approach for bacterial sample testing</p>
+        </div>
+
+        <div class="calculator-layout">
+            <div class="input-panel">
+                <h2 class="section-title">
+                    <span class="section-icon">⚙</span>
+                    Testing Parameters
+                </h2>
+
+                <div class="input-group">
+                    <label for="samplesPerMonth">
+                        <span class="input-icon">🧪</span>
+                        EM Samples Per Month
+                        <span class="field-badge">Monthly</span>
+                    </label>
+                    <div class="slider-container">
+                        <div class="slider-display-box">
+                            <input type="number" id="samplesPerMonthValue" value="500" min="0" max="5000">
+                            <span class="slider-unit">samples</span>
+                        </div>
+                        <input type="range" id="samplesPerMonth" min="0" max="5000" value="500" step="1" class="slider">
+                        <div class="slider-range-labels"><span>0</span><span>5,000</span></div>
+                    </div>
+                    <div class="input-help">Average number of EM samples collected monthly</div>
+                </div>
+
+                <div class="input-group">
+                    <label for="outsourceCost">
+                        <span class="input-icon">$</span>
+                        Current Outsource Cost Per Sample
+                        <span class="field-badge">Per Sample</span>
+                    </label>
+                    <input type="number" id="outsourceCost" value="30" min="0" step="0.01">
+                    <div class="input-help">What you currently pay per sample to external labs</div>
+                </div>
+
+                <div class="input-group">
+                    <label for="positiveRate">
+                        <span class="input-icon">%</span>
+                        Percent of Plates Exceeding Action Level Growth
+                    </label>
+                    <input type="number" id="positiveRate" value="5" min="0" max="100" step="0.1">
+                    <div class="input-help">Percentage of samples that exceed action level growth thresholds</div>
+                </div>
+
+                <div class="input-group">
+                    <label for="inHouseCost">
+                        <span class="input-icon">🏠</span>
+                        In-House Incubation Cost Per Sample
+                        <span class="field-badge">Per Sample</span>
+                    </label>
+                    <input type="number" id="inHouseCost" value="3" min="0" step="0.01">
+                    <div class="input-help">Cost to incubate samples in-house (media, labor, utilities)</div>
+                </div>
+
+                <div class="input-group">
+                    <label for="equipmentCost">
+                        <span class="input-icon">🔧</span>
+                        Initial Equipment Investment
+                        <span class="field-badge">One-time</span>
+                    </label>
+                    <input type="number" id="equipmentCost" value="28000" min="0">
+                    <div class="input-help">One-time cost for incubation equipment and setup</div>
+                </div>
+
+                <div class="input-group">
+                    <label for="timeframe">
+                        <span class="input-icon">📅</span>
+                        Analysis Timeframe
+                    </label>
+                    <select id="timeframe">
+                        <option value="1">1 Year</option>
+                        <option value="2">2 Years</option>
+                        <option value="3">3 Years</option>
+                        <option value="4">4 Years</option>
+                        <option value="5" selected>5 Years</option>
+                        <option value="6">6 Years</option>
+                        <option value="7">7 Years</option>
+                        <option value="8">8 Years</option>
+                        <option value="9">9 Years</option>
+                        <option value="10">10 Years</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="results-panel">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="scenario-card current">
+                        <div class="scenario-badge current">CURRENT</div>
+                        <div class="scenario-title">Outsourcing Incubation</div>
+                        <div class="cost-display">
+                            <div class="primary-cost" id="currentAnnualCost">$0</div>
+                            <div class="cost-label">Annual Cost</div>
+                        </div>
+                        <div class="cost-breakdown">
+                            <div class="breakdown-item">
+                                <span class="breakdown-label">Samples per year</span>
+                                <span class="breakdown-value" id="currentSamples">0</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span class="breakdown-label">Cost per sample</span>
+                                <span class="breakdown-value" id="currentCostPerSample">$0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="scenario-card optimized">
+                        <div class="scenario-badge optimized">OPTIMIZED</div>
+                        <div class="scenario-title">Insourcing Incubation</div>
+                        <div class="cost-display">
+                            <div class="primary-cost" id="newAnnualCost">$0</div>
+                            <div class="cost-label">Annual Cost</div>
+                        </div>
+                        <div class="cost-breakdown">
+                            <div class="breakdown-item">
+                                <span class="breakdown-label">In-house incubation</span>
+                                <span class="breakdown-value" id="inHouseTotal">$0</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span class="breakdown-label">External confirmations</span>
+                                <span class="breakdown-value" id="externalTotal">$0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="savings-highlight">
+                    <div class="savings-badge">TOTAL SAVINGS</div>
+                    <div class="savings-highlight-content">
+                        <div class="savings-amount" id="totalSavings">$0</div>
+                        <div class="savings-label">Total Savings Over <span id="timeframeDisplay">2</span> Years</div>
+                    </div>
+                </div>
+
+                <div class="roi-metrics">
+                    <div class="metric-item">
+                        <div class="metric-number" id="paybackMonths">0</div>
+                        <div class="metric-label">Months to Break Even</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-number" id="roiPercentage">0%</div>
+                        <div class="metric-label">ROI Over Timeframe</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateSavings() {
+            const samplesPerMonth = parseFloat(document.getElementById('samplesPerMonthValue').value) || 0;
+            const outsourceCost = parseFloat(document.getElementById('outsourceCost').value) || 0;
+            const positiveRate = parseFloat(document.getElementById('positiveRate').value) || 0;
+            const inHouseCost = parseFloat(document.getElementById('inHouseCost').value) || 0;
+            const equipmentCost = parseFloat(document.getElementById('equipmentCost').value) || 0;
+            const timeframe = parseInt(document.getElementById('timeframe').value) || 1;
+
+            const annualSamples = samplesPerMonth * 12;
+            const positiveSamples = annualSamples * (positiveRate / 100);
+
+            const currentAnnualCost = annualSamples * outsourceCost;
+            const newAnnualCost = (annualSamples * inHouseCost) + (positiveSamples * outsourceCost);
+            const annualSavings = currentAnnualCost - newAnnualCost;
+            const totalSavings = (annualSavings * timeframe) - equipmentCost;
+
+            const paybackMonths = annualSavings > 0 ? equipmentCost / (annualSavings / 12) : Infinity;
+            const roiPercentage = equipmentCost > 0 ? ((totalSavings / equipmentCost) * 100) : 0;
+
+            document.getElementById('totalSavings').textContent = formatCurrency(totalSavings);
+            document.getElementById('timeframeDisplay').textContent = timeframe;
+            document.getElementById('currentAnnualCost').textContent = formatCurrency(currentAnnualCost);
+            document.getElementById('newAnnualCost').textContent = formatCurrency(newAnnualCost);
+            document.getElementById('currentSamples').textContent = annualSamples.toLocaleString();
+            document.getElementById('currentCostPerSample').textContent = formatCurrency(outsourceCost);
+            document.getElementById('inHouseTotal').textContent = formatCurrency(annualSamples * inHouseCost);
+            document.getElementById('externalTotal').textContent = formatCurrency(positiveSamples * outsourceCost);
+            document.getElementById('paybackMonths').textContent = isFinite(paybackMonths) ? Math.round(paybackMonths * 10) / 10 : '∞';
+            document.getElementById('roiPercentage').textContent = Math.round(roiPercentage) + '%';
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('input:not(#samplesPerMonth):not(#samplesPerMonthValue), select').forEach(input => {
+                input.addEventListener('input', calculateSavings);
+            });
+
+            const slider = document.getElementById('samplesPerMonth');
+            const valueInput = document.getElementById('samplesPerMonthValue');
+
+            slider.addEventListener('input', function() {
+                valueInput.value = this.value;
+                calculateSavings();
+            });
+
+            valueInput.addEventListener('input', function() {
+                let val = parseInt(this.value) || 0;
+                val = Math.min(5000, Math.max(0, val));
+                slider.value = val;
+                calculateSavings();
+            });
+
+            calculateSavings();
+        });
+    </script>
+</body>
+</html>
